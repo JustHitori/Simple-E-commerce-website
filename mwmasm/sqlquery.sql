@@ -1,0 +1,1 @@
+﻿DBCC CHECKIDENT ('dbo.tblProducts', RESEED, 0);
