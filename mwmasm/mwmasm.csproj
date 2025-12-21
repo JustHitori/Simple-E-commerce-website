@@ -100,7 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="About.aspx" />
-    <Content Include="adminDashboard.aspx" />
+    <Content Include="admin\adminDashboard.aspx" />
     <Content Include="App_Data\userData.mdf" />
     <Content Include="App_Data\userData_log.ldf">
       <DependentUpon>userData.mdf</DependentUpon>
@@ -127,8 +127,8 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="login.aspx" />
-    <Content Include="manageCategories.aspx" />
-    <Content Include="manageProducts.aspx" />
+    <Content Include="admin\manageCategories.aspx" />
+    <Content Include="admin\manageProducts.aspx" />
     <Content Include="productCatalog.aspx" />
     <Content Include="productDetails.aspx" />
     <Content Include="register.aspx" />
@@ -197,11 +197,11 @@
     <Content Include="Site.Mobile.Master" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="adminDashboard.aspx.cs">
+    <Compile Include="admin\adminDashboard.aspx.cs">
       <DependentUpon>adminDashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="adminDashboard.aspx.designer.cs">
+    <Compile Include="admin\adminDashboard.aspx.designer.cs">
       <DependentUpon>adminDashboard.aspx</DependentUpon>
     </Compile>
     <Compile Include="adminSite.Master.cs">
@@ -244,18 +244,18 @@
     <Compile Include="login.aspx.designer.cs">
       <DependentUpon>login.aspx</DependentUpon>
     </Compile>
-    <Compile Include="manageCategories.aspx.cs">
+    <Compile Include="admin\manageCategories.aspx.cs">
       <DependentUpon>manageCategories.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="manageCategories.aspx.designer.cs">
+    <Compile Include="admin\manageCategories.aspx.designer.cs">
       <DependentUpon>manageCategories.aspx</DependentUpon>
     </Compile>
-    <Compile Include="manageProducts.aspx.cs">
+    <Compile Include="admin\manageProducts.aspx.cs">
       <DependentUpon>manageProducts.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="manageProducts.aspx.designer.cs">
+    <Compile Include="admin\manageProducts.aspx.designer.cs">
       <DependentUpon>manageProducts.aspx</DependentUpon>
     </Compile>
     <Compile Include="productCatalog.aspx.cs">
