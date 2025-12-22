@@ -71,7 +71,7 @@ You can run the project using **Visual Studio** (recommended) or via the provide
 ### Option A — Run with Visual Studio (Recommended)
 1. Open the solution file (`.sln`) using **Visual Studio 2022**.
 2. Ensure the correct startup project is selected (the web project).
-3. Click **Run (IIS Express)** / **Start**.
+3. Click **Run (IIS Express)** / **Start** / **Press F5**.
 
 ### Option B — Run with `run.cmd` (VS Code / Other IDEs)
 1. Open the project folder in your IDE (e.g., VS Code).
@@ -86,5 +86,3 @@ You can run the project using **Visual Studio** (recommended) or via the provide
 - Features listed above represent the intended scope; implementation may evolve during development.
 
 ---
-
-For assignment purposes only. If needed, add a license according to your course requirement.
