@@ -100,6 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="About.aspx" />
+    <Content Include="addAddress.aspx" />
     <Content Include="admin\adminDashboard.aspx" />
     <Content Include="App_Data\userData.mdf" />
     <Content Include="App_Data\userData_log.ldf">
@@ -129,6 +130,8 @@
     <Content Include="login.aspx" />
     <Content Include="admin\manageCategories.aspx" />
     <Content Include="admin\manageProducts.aspx" />
+    <Content Include="manageAddress.aspx" />
+    <Content Include="payment.aspx" />
     <Content Include="productCatalog.aspx" />
     <Content Include="productDetails.aspx" />
     <Content Include="register.aspx" />
@@ -197,6 +200,13 @@
     <Content Include="Site.Mobile.Master" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="addAddress.aspx.cs">
+      <DependentUpon>addAddress.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="addAddress.aspx.designer.cs">
+      <DependentUpon>addAddress.aspx</DependentUpon>
+    </Compile>
     <Compile Include="admin\adminDashboard.aspx.cs">
       <DependentUpon>adminDashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -220,6 +230,7 @@
       <DependentUpon>About.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="CartHelper.cs" />
     <Compile Include="Contact.aspx.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -257,6 +268,20 @@
     </Compile>
     <Compile Include="admin\manageProducts.aspx.designer.cs">
       <DependentUpon>manageProducts.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="manageAddress.aspx.cs">
+      <DependentUpon>manageAddress.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="manageAddress.aspx.designer.cs">
+      <DependentUpon>manageAddress.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="payment.aspx.cs">
+      <DependentUpon>payment.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="payment.aspx.designer.cs">
+      <DependentUpon>payment.aspx</DependentUpon>
     </Compile>
     <Compile Include="productCatalog.aspx.cs">
       <DependentUpon>productCatalog.aspx</DependentUpon>

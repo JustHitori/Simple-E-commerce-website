@@ -35,6 +35,11 @@ namespace mwmasm
             // ready for production, use the build tool at https://modernizr.com to pick only the tests you need
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
                             "~/Scripts/modernizr-*"));
+
+            // Bootstrap bundle - required for navbar toggle and other Bootstrap components
+            bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
+                            "~/Scripts/bootstrap.bundle.js",
+                            "~/Scripts/bootstrap.bundle.min.js"));
         }
 
         public static void RegisterJQueryScriptManager()
@@ -46,6 +51,13 @@ namespace mwmasm
                     DebugPath = "~/scripts/jquery-3.7.0.js",
                     CdnPath = "http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.7.0.min.js",
                     CdnDebugPath = "http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.7.0.js"
+                });
+
+            ScriptManager.ScriptResourceMapping.AddDefinition("bootstrap",
+                new ScriptResourceDefinition
+                {
+                    Path = "~/scripts/bootstrap.bundle.min.js",
+                    DebugPath = "~/scripts/bootstrap.bundle.js"
                 });
         }
     }

@@ -13,7 +13,7 @@ namespace mwmasm
     public partial class shoppingCart : System.Web.UI.Page
     {
         private decimal _subtotal = 0m;
-        private decimal _deliveryFee = 10m;
+        private decimal _deliveryFee = CartHelper.GetDeliveryFee();
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["CustomerId"] == null)
@@ -122,7 +122,7 @@ namespace mwmasm
             if (selectedSubtotal > 0)
             {
                 _subtotal = selectedSubtotal;
-                _deliveryFee = 10m; // or your own rule
+                _deliveryFee = CartHelper.GetDeliveryFee(); // Use shared helper
                 decimal total = _subtotal + _deliveryFee;
 
                 pnlOrderSummary.Visible = true;
@@ -220,8 +220,33 @@ namespace mwmasm
 
         protected void btnCheckout_Click(object sender, EventArgs e)
         {
-            // Later: redirect to your checkout page
-            Response.Redirect("checkout.aspx");
+            // Collect selected cart items
+            List<int> selectedCartItemIds = new List<int>();
+            
+            foreach (ListViewItem item in lvCartItems.Items)
+            {
+                var chk = item.FindControl("chkSelect") as CheckBox;
+                if (chk != null && chk.Checked)
+                {
+                    int cartItemId = (int)lvCartItems.DataKeys[item.DataItemIndex].Value;
+                    selectedCartItemIds.Add(cartItemId);
+                }
+            }
+
+            if (selectedCartItemIds.Count == 0)
+            {
+                // No items selected
+                return;
+            }
+
+            // Store selected cart item IDs in session
+            Session["SelectedCartItems"] = selectedCartItemIds;
+            Session["OrderSubtotal"] = _subtotal;
+            Session["OrderDeliveryFee"] = _deliveryFee;
+            Session["OrderTotal"] = _subtotal + _deliveryFee;
+
+            // Redirect to payment page
+            Response.Redirect("~/payment.aspx");
         }
     }
 }
