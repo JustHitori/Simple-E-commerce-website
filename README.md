@@ -80,9 +80,4 @@ You can run the project using **Visual Studio** (recommended) or via the provide
    ```bat
    .\run.cmd
 
-## Notes (Assignment Context)
-
-- This project is for educational/assignment use.
-- Features listed above represent the intended scope; implementation may evolve during development.
-
----
+   
