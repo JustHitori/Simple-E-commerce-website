@@ -102,6 +102,7 @@
     <Content Include="About.aspx" />
     <Content Include="addAddress.aspx" />
     <Content Include="admin\adminDashboard.aspx" />
+    <Content Include="admin\manageOrders.aspx" />
     <Content Include="App_Data\userData.mdf" />
     <Content Include="App_Data\userData_log.ldf">
       <DependentUpon>userData.mdf</DependentUpon>
@@ -223,6 +224,13 @@
     </Compile>
     <Compile Include="adminSite.Master.designer.cs">
       <DependentUpon>adminSite.Master</DependentUpon>
+    </Compile>
+    <Compile Include="admin\manageOrders.aspx.cs">
+      <DependentUpon>manageOrders.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="admin\manageOrders.aspx.designer.cs">
+      <DependentUpon>manageOrders.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="About.aspx.cs">
