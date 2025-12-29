@@ -35,7 +35,8 @@ namespace mwmasm
 
             using (SqlConnection con = new SqlConnection(cs))
             {
-                string sql = @"
+                string sql =
+                    @"
                     SELECT AddressId, CustomerId, Label, AddressLine1, AddressLine2, City, State, Postcode, Country, IsDefault
                     FROM dbo.tblUserAddresses
                     WHERE CustomerId = @customerId
@@ -68,7 +69,8 @@ namespace mwmasm
         private string FormatAddressForDisplay(DataRow row)
         {
             string addressLine1 = row["AddressLine1"].ToString();
-            string addressLine2 = row["AddressLine2"] != DBNull.Value ? row["AddressLine2"].ToString() : "";
+            string addressLine2 =
+                row["AddressLine2"] != DBNull.Value ? row["AddressLine2"].ToString() : "";
             string city = row["City"].ToString();
             string state = row["State"].ToString();
             string postcode = row["Postcode"].ToString();
@@ -127,7 +129,8 @@ namespace mwmasm
                         // If this is set as default, unset other default addresses
                         if (chkIsDefault.Checked)
                         {
-                            string unsetDefaultSql = @"
+                            string unsetDefaultSql =
+                                @"
                                 UPDATE dbo.tblUserAddresses
                                 SET IsDefault = 0
                                 WHERE CustomerId = @customerId AND AddressId != @addressId";
@@ -141,7 +144,8 @@ namespace mwmasm
                         }
 
                         // Update address
-                        string updateSql = @"
+                        string updateSql =
+                            @"
                             UPDATE dbo.tblUserAddresses 
                             SET Label = @label, 
                                 AddressLine1 = @addressLine1, 
@@ -158,11 +162,17 @@ namespace mwmasm
                             cmd.Parameters.AddWithValue("@addressId", addressId);
                             cmd.Parameters.AddWithValue("@customerId", customerId);
                             cmd.Parameters.AddWithValue("@label", txtLabel.Text.Trim());
-                            cmd.Parameters.AddWithValue("@addressLine1", txtAddressLine1.Text.Trim());
+                            cmd.Parameters.AddWithValue(
+                                "@addressLine1",
+                                txtAddressLine1.Text.Trim()
+                            );
 
                             if (!string.IsNullOrWhiteSpace(txtAddressLine2.Text))
                             {
-                                cmd.Parameters.AddWithValue("@addressLine2", txtAddressLine2.Text.Trim());
+                                cmd.Parameters.AddWithValue(
+                                    "@addressLine2",
+                                    txtAddressLine2.Text.Trim()
+                                );
                             }
                             else
                             {
@@ -184,7 +194,8 @@ namespace mwmasm
                     catch (Exception ex)
                     {
                         tx.Rollback();
-                        lblError.Text = "An error occurred while updating the address. Please try again.";
+                        lblError.Text =
+                            "An error occurred while updating the address. Please try again.";
                         lblError.Visible = true;
                         lblSuccess.Visible = false;
                         System.Diagnostics.Debug.WriteLine("Update address error: " + ex.Message);
@@ -218,7 +229,8 @@ namespace mwmasm
 
             using (SqlConnection con = new SqlConnection(cs))
             {
-                string deleteSql = @"
+                string deleteSql =
+                    @"
                     DELETE FROM dbo.tblUserAddresses
                     WHERE AddressId = @addressId AND CustomerId = @customerId";
 
@@ -292,7 +304,8 @@ namespace mwmasm
                         // If this is set as default, unset other default addresses
                         if (chkNewIsDefault.Checked)
                         {
-                            string unsetDefaultSql = @"
+                            string unsetDefaultSql =
+                                @"
                                 UPDATE dbo.tblUserAddresses
                                 SET IsDefault = 0
                                 WHERE CustomerId = @customerId";
@@ -305,7 +318,8 @@ namespace mwmasm
                         }
 
                         // Insert new address
-                        string insertSql = @"
+                        string insertSql =
+                            @"
                             INSERT INTO dbo.tblUserAddresses 
                             (CustomerId, Label, AddressLine1, AddressLine2, City, State, Postcode, Country, IsDefault)
                             VALUES 
@@ -315,11 +329,17 @@ namespace mwmasm
                         {
                             cmd.Parameters.AddWithValue("@customerId", customerId);
                             cmd.Parameters.AddWithValue("@label", txtNewLabel.Text.Trim());
-                            cmd.Parameters.AddWithValue("@addressLine1", txtNewAddressLine1.Text.Trim());
+                            cmd.Parameters.AddWithValue(
+                                "@addressLine1",
+                                txtNewAddressLine1.Text.Trim()
+                            );
 
                             if (!string.IsNullOrWhiteSpace(txtNewAddressLine2.Text))
                             {
-                                cmd.Parameters.AddWithValue("@addressLine2", txtNewAddressLine2.Text.Trim());
+                                cmd.Parameters.AddWithValue(
+                                    "@addressLine2",
+                                    txtNewAddressLine2.Text.Trim()
+                                );
                             }
                             else
                             {
@@ -357,7 +377,8 @@ namespace mwmasm
                     catch (Exception ex)
                     {
                         tx.Rollback();
-                        lblError.Text = "An error occurred while adding the address. Please try again.";
+                        lblError.Text =
+                            "An error occurred while adding the address. Please try again.";
                         lblError.Visible = true;
                         lblSuccess.Visible = false;
                         System.Diagnostics.Debug.WriteLine("Add address error: " + ex.Message);

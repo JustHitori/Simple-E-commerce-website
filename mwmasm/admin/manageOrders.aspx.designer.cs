@@ -7,20 +7,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace mwmasm
+namespace mwmasm.admin
 {
 
 
-    public partial class orderHistory
+    public partial class manageOrders
     {
-         /// <summary>
-        /// lvOngoingOrders control.
-        /// </summary>
-        protected global::System.Web.UI.WebControls.ListView lvOngoingOrders;
-
-        /// <summary>
-        /// lvHistoryOrders control.
-        /// </summary>
-        protected global::System.Web.UI.WebControls.ListView lvHistoryOrders;
     }
 }

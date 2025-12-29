@@ -49,7 +49,7 @@ namespace mwmasm
                         ViewState["SelectedAddressId"] = addressId;
                     }
                 }
-                
+
                 // Only reload addresses if coming from addAddress page
                 if (Request.QueryString["reload"] == "true")
                 {
@@ -73,7 +73,8 @@ namespace mwmasm
 
             using (SqlConnection con = new SqlConnection(cs))
             {
-                string sql = @"
+                string sql =
+                    @"
                     SELECT AddressId, CustomerId, Label, AddressLine1, AddressLine2, City, State, Postcode, Country, IsDefault
                     FROM dbo.tblUserAddresses
                     WHERE CustomerId = @customerId
@@ -119,7 +120,8 @@ namespace mwmasm
         private string FormatAddressForDisplay(DataRow row)
         {
             string addressLine1 = row["AddressLine1"].ToString();
-            string addressLine2 = row["AddressLine2"] != DBNull.Value ? row["AddressLine2"].ToString() : "";
+            string addressLine2 =
+                row["AddressLine2"] != DBNull.Value ? row["AddressLine2"].ToString() : "";
             string city = row["City"].ToString();
             string state = row["State"].ToString();
             string postcode = row["Postcode"].ToString();
@@ -135,21 +137,24 @@ namespace mwmasm
 
         protected void rptAddresses_ItemDataBound(object sender, RepeaterItemEventArgs e)
         {
-            if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
+            if (
+                e.Item.ItemType == ListItemType.Item
+                || e.Item.ItemType == ListItemType.AlternatingItem
+            )
             {
                 DataRowView row = (DataRowView)e.Item.DataItem;
                 RadioButton rbAddress = (RadioButton)e.Item.FindControl("rbAddress");
                 HiddenField hidAddressId = (HiddenField)e.Item.FindControl("hidAddressId");
-                
+
                 if (rbAddress != null && hidAddressId != null)
                 {
                     int addressId = int.Parse(hidAddressId.Value);
-                    
+
                     // On postback, restore selected address from ViewState or hidden field
                     if (IsPostBack)
                     {
                         int selectedAddressId = 0;
-                        
+
                         // First try ViewState
                         if (ViewState["SelectedAddressId"] != null)
                         {
@@ -163,7 +168,7 @@ namespace mwmasm
                                 ViewState["SelectedAddressId"] = selectedAddressId;
                             }
                         }
-                        
+
                         if (selectedAddressId > 0 && addressId == selectedAddressId)
                         {
                             rbAddress.Checked = true;
@@ -199,7 +204,8 @@ namespace mwmasm
             using (SqlConnection con = new SqlConnection(cs))
             {
                 // Get cart ID
-                string cartSql = @"
+                string cartSql =
+                    @"
                     SELECT TOP 1 shoppingCartId
                     FROM dbo.tblShoppingCart
                     WHERE customerId = @customerId
@@ -226,7 +232,8 @@ namespace mwmasm
                 // Get selected cart items with product details
                 // Build parameterized IN clause
                 var parameters = new List<string>();
-                string sql = @"
+                string sql =
+                    @"
                     SELECT ci.cartItemId,
                            ci.productId,
                            ci.quantity,
@@ -309,7 +316,7 @@ namespace mwmasm
             // Validate inputs - get selected address
             int addressId = 0;
             bool addressSelected = false;
-            
+
             foreach (RepeaterItem item in rptAddresses.Items)
             {
                 RadioButton rbAddress = (RadioButton)item.FindControl("rbAddress");
@@ -372,7 +379,8 @@ namespace mwmasm
                     try
                     {
                         // Get full address details
-                        string addressSql = @"
+                        string addressSql =
+                            @"
                             SELECT AddressLine1, AddressLine2, City, State, Postcode, Country
                             FROM dbo.tblUserAddresses
                             WHERE AddressId = @addressId";
@@ -386,16 +394,28 @@ namespace mwmasm
                                 if (reader.Read())
                                 {
                                     fullAddress = reader["AddressLine1"].ToString();
-                                    if (reader["AddressLine2"] != DBNull.Value && !string.IsNullOrEmpty(reader["AddressLine2"].ToString()))
+                                    if (
+                                        reader["AddressLine2"] != DBNull.Value
+                                        && !string.IsNullOrEmpty(reader["AddressLine2"].ToString())
+                                    )
                                         fullAddress += ", " + reader["AddressLine2"].ToString();
-                                    fullAddress += ", " + reader["City"].ToString() + ", " + reader["State"].ToString() + " " + reader["Postcode"].ToString() + ", " + reader["Country"].ToString();
+                                    fullAddress +=
+                                        ", "
+                                        + reader["City"].ToString()
+                                        + ", "
+                                        + reader["State"].ToString()
+                                        + " "
+                                        + reader["Postcode"].ToString()
+                                        + ", "
+                                        + reader["Country"].ToString();
                                 }
                             }
                         }
 
                         // Create order
                         int orderId = 0;
-                        string orderSql = @"
+                        string orderSql =
+                            @"
                             INSERT INTO dbo.tblorders (customerid, orderdate, totalamount, shippingaddress, paymentmethod, orderstatus, paymentstatus)
                             VALUES (@customerId, GETDATE(), @totalAmount, @shippingAddress, @paymentMethod, @orderStatus, @paymentStatus);
                             SELECT SCOPE_IDENTITY();";
@@ -407,7 +427,7 @@ namespace mwmasm
                             cmd.Parameters.AddWithValue("@shippingAddress", fullAddress);
                             cmd.Parameters.AddWithValue("@paymentMethod", paymentMethod);
                             cmd.Parameters.AddWithValue("@orderStatus", "Pending");
-                            cmd.Parameters.AddWithValue("@paymentStatus", "Pending");
+                            cmd.Parameters.AddWithValue("@paymentStatus", "Unpaid"); //Means payment operation is failed or not completed
 
                             object result = cmd.ExecuteScalar();
                             if (result != null)
@@ -422,7 +442,8 @@ namespace mwmasm
                         }
 
                         // Get cart ID
-                        string cartSql = @"
+                        string cartSql =
+                            @"
                             SELECT TOP 1 shoppingCartId
                             FROM dbo.tblShoppingCart
                             WHERE customerId = @customerId
@@ -442,7 +463,8 @@ namespace mwmasm
                         // Create order details and remove from cart
                         // Build parameterized IN clause for order details
                         var orderDetailParams = new List<string>();
-                        string orderDetailsSql = @"
+                        string orderDetailsSql =
+                            @"
                             INSERT INTO dbo.tblOrderDetails (orderId, productId, quantity, unitPrice)
                             SELECT @orderId, ci.productId, ci.quantity, p.price
                             FROM dbo.tblCartItems ci
@@ -464,13 +486,17 @@ namespace mwmasm
                             cmd.Parameters.AddWithValue("@cartId", cartId);
                             for (int i = 0; i < selectedCartItemIds.Count; i++)
                             {
-                                cmd.Parameters.AddWithValue("@orderItemId" + i, selectedCartItemIds[i]);
+                                cmd.Parameters.AddWithValue(
+                                    "@orderItemId" + i,
+                                    selectedCartItemIds[i]
+                                );
                             }
                             cmd.ExecuteNonQuery();
                         }
 
                         // Delete selected items from cart
-                        string deleteCartItemsSql = @"
+                        string deleteCartItemsSql =
+                            @"
                             DELETE FROM dbo.tblCartItems
                             WHERE shoppingCartId = @cartId
                               AND cartItemId IN (";
@@ -487,13 +513,17 @@ namespace mwmasm
                             cmd.Parameters.AddWithValue("@cartId", cartId);
                             for (int i = 0; i < selectedCartItemIds.Count; i++)
                             {
-                                cmd.Parameters.AddWithValue("@deleteItemId" + i, selectedCartItemIds[i]);
+                                cmd.Parameters.AddWithValue(
+                                    "@deleteItemId" + i,
+                                    selectedCartItemIds[i]
+                                );
                             }
                             cmd.ExecuteNonQuery();
                         }
 
                         // Create payment record
-                        string paymentSql = @"
+                        string paymentSql =
+                            @"
                             INSERT INTO dbo.tblpayments (orderId, paymentDate, paymentMethod, amount)
                             VALUES (@orderId, GETDATE(), @paymentMethod, @amount)";
 
@@ -502,6 +532,20 @@ namespace mwmasm
                             cmd.Parameters.AddWithValue("@orderId", orderId);
                             cmd.Parameters.AddWithValue("@paymentMethod", paymentMethod);
                             cmd.Parameters.AddWithValue("@amount", _total);
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        // Update payment status to Paid after payment record is successfully created
+                        string updatePaymentStatusSql =
+                            @"
+                            UPDATE dbo.tblorders
+                            SET paymentStatus = @paymentStatus
+                            WHERE orderId = @orderId";
+
+                        using (SqlCommand cmd = new SqlCommand(updatePaymentStatusSql, con, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@orderId", orderId);
+                            cmd.Parameters.AddWithValue("@paymentStatus", "Paid");
                             cmd.ExecuteNonQuery();
                         }
 
@@ -519,7 +563,9 @@ namespace mwmasm
                     catch (Exception ex)
                     {
                         tx.Rollback();
-                        lblError.Text = "An error occurred while placing your order. Please try again.";
+                        Console.WriteLine("Error:" + ex.Message);
+                        lblError.Text =
+                            "An error occurred while placing your order. Please try again.";
                         lblError.Visible = true;
                     }
                 }
