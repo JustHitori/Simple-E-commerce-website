@@ -127,10 +127,13 @@
     <Content Include="Default.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="images\address-image.png" />
     <Content Include="login.aspx" />
     <Content Include="admin\manageCategories.aspx" />
     <Content Include="admin\manageProducts.aspx" />
     <Content Include="manageAddress.aspx" />
+    <Content Include="orderDetails.aspx" />
+    <Content Include="orderHistory.aspx" />
     <Content Include="payment.aspx" />
     <Content Include="productCatalog.aspx" />
     <Content Include="productDetails.aspx" />
@@ -275,6 +278,20 @@
     </Compile>
     <Compile Include="manageAddress.aspx.designer.cs">
       <DependentUpon>manageAddress.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="orderDetails.aspx.cs">
+      <DependentUpon>orderDetails.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="orderDetails.aspx.designer.cs">
+      <DependentUpon>orderDetails.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="orderHistory.aspx.cs">
+      <DependentUpon>orderHistory.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="orderHistory.aspx.designer.cs">
+      <DependentUpon>orderHistory.aspx</DependentUpon>
     </Compile>
     <Compile Include="payment.aspx.cs">
       <DependentUpon>payment.aspx</DependentUpon>
