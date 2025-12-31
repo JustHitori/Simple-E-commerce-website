@@ -12,6 +12,8 @@ namespace mwmasm
 {
     public partial class orderDetails : System.Web.UI.Page
     {
+        private int _currentOrderId = 0;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["CustomerId"] == null)
@@ -39,6 +41,8 @@ namespace mwmasm
                 }
 
                 int customerId = (int)Session["CustomerId"];
+                _currentOrderId = orderId;
+                ViewState["OrderId"] = orderId;
                 LoadOrderDetails(orderId, customerId);
             }
         }
@@ -87,6 +91,9 @@ namespace mwmasm
 
                         // Set progress bar based on order status
                         SetProgressBar(orderStatus);
+
+                        // Set cancel button visibility based on order status
+                        SetCancelButtonVisibility(orderStatus);
 
                         // Set address information
                         // Extract address label from shipping address (first part before comma)
@@ -175,44 +182,155 @@ namespace mwmasm
 
         private void SetProgressBar(string orderStatus)
         {
-            int progress = 0;
-            string statusText = "";
+            // Get segment controls - search recursively in the page
+            System.Web.UI.HtmlControls.HtmlGenericControl segPending =
+                FindControlRecursive(Page, "segmentPending")
+                as System.Web.UI.HtmlControls.HtmlGenericControl;
+            System.Web.UI.HtmlControls.HtmlGenericControl segSentOut =
+                FindControlRecursive(Page, "segmentSentOut")
+                as System.Web.UI.HtmlControls.HtmlGenericControl;
+            System.Web.UI.HtmlControls.HtmlGenericControl segDelivered =
+                FindControlRecursive(Page, "segmentDelivered")
+                as System.Web.UI.HtmlControls.HtmlGenericControl;
 
-            // Reset all labels
+            // Reset all segments to inactive (light gray)
+            if (segPending != null)
+                segPending.Attributes["class"] = "progress-segment";
+            if (segSentOut != null)
+                segSentOut.Attributes["class"] = "progress-segment";
+            if (segDelivered != null)
+                segDelivered.Attributes["class"] = "progress-segment";
+
+            // Reset all labels to inactive (they remain visible, just gray)
             labelPending.CssClass = "progress-label";
             labelSentOut.CssClass = "progress-label";
             labelDelivered.CssClass = "progress-label";
 
-            switch (orderStatus.ToLower())
+            string statusLower = orderStatus.Trim().ToLower();
+
+            switch (statusLower)
             {
                 case "pending":
-                    progress = 33;
-                    statusText = "Pending";
+                    // Only current step (pending) is active
+                    if (segPending != null)
+                        segPending.Attributes["class"] = "progress-segment active";
                     labelPending.CssClass = "progress-label active";
                     break;
                 case "sent out for delivery":
-                case "sentoutfordelivery":
-                case "shipped":
-                    progress = 66;
-                    statusText = "Sent out for delivery";
+                    // Only current step (sent out) is active, pending becomes inactive
+                    if (segSentOut != null)
+                        segSentOut.Attributes["class"] = "progress-segment active";
                     labelSentOut.CssClass = "progress-label active";
                     break;
                 case "delivered":
                 case "completed":
-                    progress = 100;
-                    statusText = "Delivered";
+                    // Only current step (delivered) is active, previous steps are inactive
+                    if (segDelivered != null)
+                        segDelivered.Attributes["class"] = "progress-segment active";
                     labelDelivered.CssClass = "progress-label active";
                     break;
                 default:
-                    progress = 33;
-                    statusText = "Pending";
+                    if (segPending != null)
+                        segPending.Attributes["class"] = "progress-segment active";
                     labelPending.CssClass = "progress-label active";
                     break;
             }
+        }
 
-            progressBarFill.Style["width"] = progress + "%";
-            progressBarFill.Attributes["aria-valuenow"] = progress.ToString();
-            progressTextActive.InnerText = statusText;
+        private void SetCancelButtonVisibility(string orderStatus)
+        {
+            string statusLower = orderStatus.Trim().ToLower();
+
+            // Show cancel button only for Pending, Sent out for delivery, or Delivered
+            // Hide for Completed or Cancelled
+            if (
+                statusLower == "pending"
+                || statusLower == "sent out for delivery"
+                || statusLower == "delivered"
+            )
+            {
+                btnCancelOrder.Visible = true;
+            }
+            else
+            {
+                btnCancelOrder.Visible = false;
+            }
+        }
+
+        protected void btnCancelOrder_Click(object sender, EventArgs e)
+        {
+            if (Session["CustomerId"] == null)
+            {
+                Response.Redirect("~/login.aspx");
+                return;
+            }
+
+            int orderId;
+            if (ViewState["OrderId"] != null)
+            {
+                orderId = (int)ViewState["OrderId"];
+            }
+            else
+            {
+                string orderIdParam = Request.QueryString["orderId"];
+                if (string.IsNullOrEmpty(orderIdParam) || !int.TryParse(orderIdParam, out orderId))
+                {
+                    lblError.Text = "Invalid order ID.";
+                    lblError.Visible = true;
+                    return;
+                }
+            }
+
+            int customerId = (int)Session["CustomerId"];
+
+            // Update order status to Cancelled
+            string cs = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+
+            using (SqlConnection con = new SqlConnection(cs))
+            {
+                string sql =
+                    @"
+                    UPDATE dbo.tblorders
+                    SET orderstatus = @orderStatus
+                    WHERE orderId = @orderId AND customerid = @customerId";
+
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@orderId", orderId);
+                    cmd.Parameters.AddWithValue("@orderStatus", "Cancelled");
+                    cmd.Parameters.AddWithValue("@customerId", customerId);
+                    con.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    con.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        // Reload the page to reflect the updated status
+                        Response.Redirect("~/orderDetails.aspx?orderId=" + orderId);
+                    }
+                    else
+                    {
+                        lblError.Text =
+                            "Failed to cancel order. Order not found or you don't have permission.";
+                        lblError.Visible = true;
+                    }
+                }
+            }
+        }
+
+        private Control FindControlRecursive(Control root, string id)
+        {
+            if (root == null)
+                return null;
+            if (root.ID == id)
+                return root;
+            foreach (Control c in root.Controls)
+            {
+                Control t = FindControlRecursive(c, id);
+                if (t != null)
+                    return t;
+            }
+            return null;
         }
     }
 }

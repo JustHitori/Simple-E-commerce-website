@@ -1,51 +1,47 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace mwmasm
+namespace mwmasm.admin
 {
-    public partial class login : System.Web.UI.Page
+    public partial class adminLogin : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e) { }
 
         protected void btnLogin_Click(object sender, EventArgs e)
         {
-            string email = txtEmail.Text.Trim();
+            string username = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
 
             string cs = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
 
-            string customerquery =
-                "SELECT CustomerID, fname, lname, email FROM tblCustomers WHERE email = @Email AND password = @Password";
+            string adminquery =
+                "SELECT adminId, username FROM tblAdmin WHERE username = @Username AND password = @Password";
 
             using (SqlConnection conn = new SqlConnection(cs))
-            using (SqlCommand cmd = new SqlCommand(customerquery, conn))
+            using (SqlCommand cmd = new SqlCommand(adminquery, conn))
             {
-                cmd.Parameters.AddWithValue("@Email", email);
+                cmd.Parameters.AddWithValue("@Username", username);
                 cmd.Parameters.AddWithValue("@Password", password);
-
                 conn.Open();
                 SqlDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())
                 {
-                    Session["CustomerID"] = reader["CustomerID"];
-                    Session["CustomerName"] = reader["fname"];
-                    Session["CustomerEmail"] = reader["email"];
-
+                    Session["AdminUsername"] = reader["username"];
+                    Session["AdminId"] = reader["adminId"];
                     reader.Close();
                     conn.Close();
-
-                    Response.Redirect("~/Default.aspx");
+                    Response.Redirect("~/admin/adminDashboard.aspx");
                 }
                 else
                 {
-                    lblError.Text = "Invalid email or password.";
+                    lblError.Text = "Invalid username or password.";
+                    reader.Close();
+                    conn.Close();
                 }
             }
         }

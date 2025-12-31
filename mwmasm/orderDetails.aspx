@@ -12,8 +12,10 @@
             <!-- Progress Bar with All Status Labels -->
             <div class="progress-container mb-3">
                 <div class="progress-bar-wrapper">
-                    <div class="progress-bar-fill" id="progressBarFill" runat="server" style="width: 0%;">
-                        <span class="progress-text-active" id="progressTextActive" runat="server"></span>
+                    <div class="progress-segments">
+                        <div class="progress-segment" id="segmentPending" runat="server"></div>
+                        <div class="progress-segment" id="segmentSentOut" runat="server"></div>
+                        <div class="progress-segment" id="segmentDelivered" runat="server"></div>
                     </div>
                     <div class="progress-labels">
                         <asp:Label ID="labelPending" runat="server" CssClass="progress-label" Text="Pending"></asp:Label>
@@ -107,6 +109,36 @@
                 </div>
             </div>
         </div>
+
+        <!-- Cancel Order Button -->
+        <div class="mt-4 text-center">
+            <asp:Button ID="btnCancelOrder" runat="server" 
+                Text="Cancel Order" 
+                CssClass="btn btn-danger"
+                OnClientClick="return showCancelOrderModal('confirmCancelOrderModal');" />
+        </div>
+    </div>
+
+    <!-- Modal for cancel order confirmation -->
+    <div class="modal" tabindex="-1" id="confirmCancelOrderModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cancel Order</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to cancel this order? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <asp:Button ID="btnConfirmCancelOrder" runat="server"
+                        Text="Yes, Cancel Order"
+                        CssClass="btn btn-danger"
+                        OnClick="btnCancelOrder_Click"
+                        CausesValidation="false" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <style>
@@ -125,26 +157,28 @@
             background-color: #e9ecef;
             border-radius: 8px;
             overflow: hidden;
+            display: flex;
         }
 
-        .progress-bar-fill {
+        .progress-segments {
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
             height: 100%;
-            background-color: #212529;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 500;
-            transition: width 0.6s ease;
             z-index: 2;
         }
 
-        .progress-text-active {
-            color: white;
-            font-weight: 600;
+        .progress-segment {
+            flex: 1;
+            height: 100%;
+            background-color: #e9ecef;
+            transition: background-color 0.6s ease;
+        }
+
+        .progress-segment.active {
+            background-color: #212529;
         }
 
         .progress-labels {
@@ -156,7 +190,7 @@
             display: flex;
             align-items: center;
             justify-content: space-around;
-            z-index: 1;
+            z-index: 3;
             padding: 0 10px;
         }
 
@@ -194,4 +228,14 @@
             background-color: #fff;
         }
     </style>
+
+    <script>
+        function showCancelOrderModal(modalId) {
+            var el = document.getElementById(modalId);
+            if (!el) return false;
+            var modal = new bootstrap.Modal(el);
+            modal.show();
+            return false;
+        }
+    </script>
 </asp:Content>

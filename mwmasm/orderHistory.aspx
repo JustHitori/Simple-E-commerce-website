@@ -11,6 +11,9 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="true">History</button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" type="button" role="tab" aria-controls="cancelled" aria-selected="false">Cancelled</button>
+            </li>
         </ul>
 
         <!-- Tab -->
@@ -102,6 +105,52 @@
                     <EmptyDataTemplate>
                         <div class="alert alert-info">
                             No order history found.
+                        </div>
+                    </EmptyDataTemplate>
+                </asp:ListView>
+            </div>
+
+            <!-- Cancelled Orders -->
+            <div class="tab-pane fade" id="cancelled" role="tabpanel" aria-labelledby="cancelled-tab">
+                <asp:ListView ID="lvCancelledOrders" runat="server">
+                    <LayoutTemplate>
+                        <div id="cancelledOrdersContainer" runat="server">
+                            <asp:PlaceHolder ID="itemPlaceholder" runat="server" />
+                        </div>
+                    </LayoutTemplate>
+                    <ItemTemplate>
+                        <asp:HyperLink ID="hlOrderLink" runat="server" 
+                            NavigateUrl='<%# "~/orderDetails.aspx?orderId=" + Eval("orderId") %>' 
+                            CssClass="text-decoration-none text-dark">
+                            <div class="order-item-card mb-3 p-3 border rounded-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="order-item-image me-3">
+                                        <asp:Image ID="imgProduct" runat="server"
+                                            ImageUrl='<%# Eval("imageUrl") %>'
+                                            AlternateText='<%# Eval("productName") %>'
+                                            CssClass="product-image" />
+                                    </div>
+                                    <div class="order-item-info flex-grow-1">
+                                        <div class="fw-bold mb-1">
+                                            <%# Eval("productName") %>
+                                        </div>
+                                        <div class="text-muted small mb-1">
+                                            <%# Eval("quantity") %> items
+                                        </div>
+                                        <div class="fw-semibold">
+                                            RM <%# Eval("subtotal", "{0:N2}") %>
+                                        </div>
+                                    </div>
+                                    <div class="order-item-date text-muted small">
+                                        <%# Eval("orderDate", "{0:dd/MM/yyyy}") %>
+                                    </div>
+                                </div>
+                            </div>
+                        </asp:HyperLink>
+                    </ItemTemplate>
+                    <EmptyDataTemplate>
+                        <div class="alert alert-info">
+                            No cancelled orders found.
                         </div>
                     </EmptyDataTemplate>
                 </asp:ListView>

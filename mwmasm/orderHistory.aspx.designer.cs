@@ -22,5 +22,10 @@ namespace mwmasm
         /// lvHistoryOrders control.
         /// </summary>
         protected global::System.Web.UI.WebControls.ListView lvHistoryOrders;
+
+        /// <summary>
+        /// lvCancelledOrders control.
+        /// </summary>
+        protected global::System.Web.UI.WebControls.ListView lvCancelledOrders;
     }
 }

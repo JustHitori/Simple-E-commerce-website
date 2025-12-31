@@ -22,7 +22,7 @@ namespace mwmasm
                 return;
             }
 
-            if(!IsPostBack)
+            if (!IsPostBack)
             {
                 BindCart();
             }
@@ -222,7 +222,7 @@ namespace mwmasm
         {
             // Collect selected cart items
             List<int> selectedCartItemIds = new List<int>();
-            
+
             foreach (ListViewItem item in lvCartItems.Items)
             {
                 var chk = item.FindControl("chkSelect") as CheckBox;

@@ -68,7 +68,7 @@ namespace mwmasm
                             cmd.Parameters.AddWithValue("@customerId", customerId);
                             cmd.Parameters.AddWithValue("@label", txtLabel.Text.Trim());
                             cmd.Parameters.AddWithValue("@addressLine1", txtAddressLine1.Text.Trim());
-                            
+
                             // AddressLine2 is optional
                             if (!string.IsNullOrWhiteSpace(txtAddressLine2.Text))
                             {
@@ -78,7 +78,7 @@ namespace mwmasm
                             {
                                 cmd.Parameters.AddWithValue("@addressLine2", DBNull.Value);
                             }
-                            
+
                             cmd.Parameters.AddWithValue("@city", txtCity.Text.Trim());
                             cmd.Parameters.AddWithValue("@state", txtState.Text.Trim());
                             cmd.Parameters.AddWithValue("@postcode", txtPostcode.Text.Trim());

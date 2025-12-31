@@ -24,6 +24,7 @@ namespace mwmasm
             {
                 LoadOngoingOrders();
                 LoadHistoryOrders();
+                LoadCancelledOrders();
             }
         }
 
@@ -52,7 +53,7 @@ namespace mwmasm
                     INNER JOIN dbo.tblProducts p ON od.productId = p.productId
                     INNER JOIN dbo.tblorders o ON od.orderId = o.orderId
                     WHERE o.customerid = @customerId
-                      AND o.orderstatus NOT IN ('Completed', 'Delivered', 'Cancelled')
+                      AND o.orderstatus IN ('Pending', 'Sent out for delivery', 'Delivered')
                     ORDER BY o.orderDate DESC, od.orderdetailsId DESC";
 
                 using (SqlCommand cmd = new SqlCommand(sql, con))
@@ -94,7 +95,7 @@ namespace mwmasm
                     INNER JOIN dbo.tblProducts p ON od.productId = p.productId
                     INNER JOIN dbo.tblorders o ON od.orderId = o.orderId
                     WHERE o.customerid = @customerId
-                      AND o.orderstatus IN ('Completed', 'Delivered', 'Cancelled')
+                      AND o.orderstatus = 'Completed'
                     ORDER BY o.orderDate DESC, od.orderdetailsId DESC";
 
                 using (SqlCommand cmd = new SqlCommand(sql, con))
@@ -109,6 +110,48 @@ namespace mwmasm
 
             lvHistoryOrders.DataSource = dt;
             lvHistoryOrders.DataBind();
+        }
+
+        private void LoadCancelledOrders()
+        {
+            int customerId = (int)Session["CustomerId"];
+            string cs = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+
+            DataTable dt = new DataTable();
+
+            using (SqlConnection con = new SqlConnection(cs))
+            {
+                string sql =
+                    @"
+                    SELECT 
+                        od.orderdetailsId,
+                        od.orderId,
+                        od.productId,
+                        od.quantity,
+                        od.unitPrice,
+                        od.subtotal,
+                        p.name AS productName,
+                        p.imageUrl,
+                        o.orderDate
+                    FROM dbo.tblOrderDetails od
+                    INNER JOIN dbo.tblProducts p ON od.productId = p.productId
+                    INNER JOIN dbo.tblorders o ON od.orderId = o.orderId
+                    WHERE o.customerid = @customerId
+                      AND o.orderstatus = 'Cancelled'
+                    ORDER BY o.orderDate DESC, od.orderdetailsId DESC";
+
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@customerId", customerId);
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    {
+                        da.Fill(dt);
+                    }
+                }
+            }
+
+            lvCancelledOrders.DataSource = dt;
+            lvCancelledOrders.DataBind();
         }
     }
 }
