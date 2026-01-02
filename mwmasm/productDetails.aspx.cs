@@ -12,10 +12,7 @@ namespace mwmasm
 {
     public partial class productDetails : System.Web.UI.Page
     {
-        protected void Page_Load(object sender, EventArgs e)
-        {
-
-        }
+        protected void Page_Load(object sender, EventArgs e) { }
 
         protected void btnAddToCart_Click(object sender, EventArgs e)
         {
@@ -26,7 +23,16 @@ namespace mwmasm
             }
             int customerId = (int)Session["CustomerId"];
 
-            if (!TryGetFormValues(out int productId, out string _name, out decimal _priceIgnored, out string _img, out int qty, out string err))
+            if (
+                !TryGetFormValues(
+                    out int productId,
+                    out string _name,
+                    out decimal _priceIgnored,
+                    out string _img,
+                    out int qty,
+                    out string err
+                )
+            )
             {
                 SetStatus(err, true);
                 return;
@@ -51,11 +57,17 @@ namespace mwmasm
 
                         // ✅ Upsert line in tblCartItems (no unitPrice in your table)
                         int rows;
-                        using (SqlCommand cmd = new SqlCommand(@"
+                        using (
+                            SqlCommand cmd = new SqlCommand(
+                                @"
                     UPDATE ci
                     SET quantity = ci.quantity + @q
                     FROM dbo.tblCartItems ci
-                    WHERE ci.shoppingCartId = @cartId AND ci.productId = @pid;", con, tx))
+                    WHERE ci.shoppingCartId = @cartId AND ci.productId = @pid;",
+                                con,
+                                tx
+                            )
+                        )
                         {
                             cmd.Parameters.AddWithValue("@q", qty);
                             cmd.Parameters.AddWithValue("@cartId", shoppingCartId);
@@ -65,9 +77,15 @@ namespace mwmasm
 
                         if (rows == 0)
                         {
-                            using (SqlCommand cmd = new SqlCommand(@"
+                            using (
+                                SqlCommand cmd = new SqlCommand(
+                                    @"
                         INSERT INTO dbo.tblCartItems (shoppingCartId, productId, quantity)
-                        VALUES (@cartId, @pid, @q);", con, tx))
+                        VALUES (@cartId, @pid, @q);",
+                                    con,
+                                    tx
+                                )
+                            )
                             {
                                 cmd.Parameters.AddWithValue("@cartId", shoppingCartId);
                                 cmd.Parameters.AddWithValue("@pid", productId);
@@ -83,24 +101,155 @@ namespace mwmasm
                     }
                     catch (Exception ex)
                     {
-                        try { tx.Rollback(); } catch { /* ignore */ }
+                        try
+                        {
+                            tx.Rollback();
+                        }
+                        catch
+                        { /* ignore */
+                        }
                         SetStatus("Error adding to cart: " + ex.Message, true);
                     }
                 }
             }
         }
 
-
-
-
         protected void btnBuyNow_Click(object sender, EventArgs e)
         {
-            // Ensure it's in the cart, then go to checkout
-            btnAddToCart_Click(sender, e);
-            Response.Redirect("checkout.aspx"); // create this page later
+            if (Session["CustomerId"] == null)
+            {
+                Response.Redirect("~/login.aspx");
+                return;
+            }
+            int customerId = (int)Session["CustomerId"];
+
+            if (
+                !TryGetFormValues(
+                    out int productId,
+                    out string _name,
+                    out decimal _priceIgnored,
+                    out string _img,
+                    out int qty,
+                    out string err
+                )
+            )
+            {
+                SetStatus(err, true);
+                return;
+            }
+            if (qty <= 0)
+            {
+                SetStatus("Quantity must be at least 1.", true);
+                return;
+            }
+
+            string cs = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+
+            using (SqlConnection con = new SqlConnection(cs))
+            {
+                con.Open();
+                using (SqlTransaction tx = con.BeginTransaction())
+                {
+                    try
+                    {
+                        // Get or create this user's cart
+                        int shoppingCartId = GetOrCreateOpenCartId(con, tx, customerId);
+
+                        int cartItemId = 0;
+
+                        // Check if item already exists in cart
+                        using (
+                            SqlCommand cmd = new SqlCommand(
+                                @"
+                            SELECT cartItemId FROM dbo.tblCartItems 
+                            WHERE shoppingCartId = @cartId AND productId = @pid",
+                                con,
+                                tx
+                            )
+                        )
+                        {
+                            cmd.Parameters.AddWithValue("@cartId", shoppingCartId);
+                            cmd.Parameters.AddWithValue("@pid", productId);
+                            object result = cmd.ExecuteScalar();
+                            if (result != null)
+                            {
+                                cartItemId = Convert.ToInt32(result);
+                                // Update quantity
+                                using (
+                                    SqlCommand updateCmd = new SqlCommand(
+                                        @"
+                                    UPDATE dbo.tblCartItems 
+                                    SET quantity = quantity + @q
+                                    WHERE cartItemId = @cartItemId",
+                                        con,
+                                        tx
+                                    )
+                                )
+                                {
+                                    updateCmd.Parameters.AddWithValue("@q", qty);
+                                    updateCmd.Parameters.AddWithValue("@cartItemId", cartItemId);
+                                    updateCmd.ExecuteNonQuery();
+                                }
+                            }
+                            else
+                            {
+                                // Insert new cart item and get the ID
+                                using (
+                                    SqlCommand insertCmd = new SqlCommand(
+                                        @"
+                                    INSERT INTO dbo.tblCartItems (shoppingCartId, productId, quantity)
+                                    OUTPUT INSERTED.cartItemId
+                                    VALUES (@cartId, @pid, @q)",
+                                        con,
+                                        tx
+                                    )
+                                )
+                                {
+                                    insertCmd.Parameters.AddWithValue("@cartId", shoppingCartId);
+                                    insertCmd.Parameters.AddWithValue("@pid", productId);
+                                    insertCmd.Parameters.AddWithValue("@q", qty);
+                                    cartItemId = Convert.ToInt32(insertCmd.ExecuteScalar());
+                                }
+                            }
+                        }
+
+                        tx.Commit();
+
+                        // Store selected cart item ID in session and redirect to payment
+                        if (cartItemId > 0)
+                        {
+                            List<int> selectedCartItemIds = new List<int> { cartItemId };
+                            Session["SelectedCartItems"] = selectedCartItemIds;
+                            Response.Redirect("~/payment.aspx");
+                        }
+                        else
+                        {
+                            SetStatus("Error: Could not add item to cart.", true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            tx.Rollback();
+                        }
+                        catch
+                        { /* ignore */
+                        }
+                        SetStatus("Error: " + ex.Message, true);
+                    }
+                }
+            }
         }
 
-        private bool TryGetFormValues(out int productId, out string name, out decimal price, out string imageUrl, out int qty, out string error)
+        private bool TryGetFormValues(
+            out int productId,
+            out string name,
+            out decimal price,
+            out string imageUrl,
+            out int qty,
+            out string error
+        )
         {
             productId = 0;
             name = "";
@@ -152,31 +301,22 @@ namespace mwmasm
             return true;
         }
 
-
-
         private void SetStatus(string message, bool isError)
         {
-            var lbl = fvProduct.FindControl("lblStatus") as System.Web.UI.WebControls.Label;
-            if (lbl != null)
-            {
-                lbl.Text = message;
-                lbl.CssClass = isError ? "text-danger" : "text-success";
-
-                string script = @"
-                    setTimeout(function() {
-                        var lbl = document.getElementById('" + lbl.ClientID + @"');
-                        if (lbl) lbl.style.display = 'none';
-                    }, 3000);
-                ";
-
-                ScriptManager.RegisterStartupScript(this, GetType(), "HideStatusMsg", script, true);
-            }
+            // Show toast notification instead of label
+            string script =
+                "showToast('"
+                + message.Replace("'", "\\'").Replace("\r\n", " ").Replace("\n", " ")
+                + "');";
+            ScriptManager.RegisterStartupScript(this, GetType(), "ShowToast", script, true);
         }
 
         private int GetOrCreateOpenCartId(SqlConnection con, SqlTransaction tx, int customerId)
         {
             // We assume: one active cart per customer, use the latest shoppingCartId
-            using (var cmd = new SqlCommand(@"
+            using (
+                var cmd = new SqlCommand(
+                    @"
         DECLARE @cartId INT;
 
         -- Take an update lock so two requests can't create two carts at same time
@@ -192,12 +332,15 @@ namespace mwmasm
             SET @cartId = SCOPE_IDENTITY();
         END
 
-        SELECT @cartId;", con, tx))
+        SELECT @cartId;",
+                    con,
+                    tx
+                )
+            )
             {
                 cmd.Parameters.AddWithValue("@cid", customerId);
                 return Convert.ToInt32(cmd.ExecuteScalar());
             }
         }
-
     }
 }

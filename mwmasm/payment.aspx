@@ -127,11 +127,34 @@
             <asp:Button ID="btnPlaceOrder" runat="server" 
             Text="Place Order" 
             CssClass="btn btn-dark custom-width py-3 mb-4" 
-            OnClick="btnPlaceOrder_Click" />
+            OnClientClick="return showPlaceOrderModal('confirmPlaceOrderModal');" />
         </div>
 
         <!-- Error Message -->
         <asp:Label ID="lblError" runat="server" CssClass="text-danger" Visible="false"></asp:Label>
+    </div>
+
+    <!-- Modal for place order confirmation -->
+    <div class="modal" tabindex="-1" id="confirmPlaceOrderModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Do you want to proceed with the payment?</p>
+                </div>
+                <div class="modal-footer">
+                    <asp:Button ID="btnConfirmPlaceOrder" runat="server"
+                        Text="Yes, Pay Now"
+                        CssClass="btn btn-dark"
+                        OnClick="btnPlaceOrder_Click"
+                        CausesValidation="false" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <style>
@@ -400,5 +423,15 @@
                 initAddressCards();
             }
         })();
+    </script>
+
+    <script>
+        function showPlaceOrderModal(modalId) {
+            var el = document.getElementById(modalId);
+            if (!el) return false;
+            var modal = new bootstrap.Modal(el);
+            modal.show();
+            return false;
+        }
     </script>
 </asp:Content>
