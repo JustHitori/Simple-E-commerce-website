@@ -31,7 +31,9 @@
                     <!-- Description -->
                     <div class="product-description">
                         <h3 class="section-title">Description</h3>
-                        <p class="description-text"><%# Eval("description") %></p>
+                        <p class="description-text">
+                            <%# string.IsNullOrWhiteSpace(Eval("description") as string) ? "None" : Eval("description") %>
+                        </p>
                     </div>
 
                     <!-- Product Details -->
@@ -53,12 +55,20 @@
                             <asp:RequiredFieldValidator runat="server"
                                 ControlToValidate="txtQty" ErrorMessage="Qty required"
                                 Display="Dynamic" ForeColor="Red" CssClass="validation-error" />
-                            <asp:RangeValidator runat="server"
-                                ControlToValidate="txtQty" MinimumValue="1" MaximumValue='<%#Eval("stockQuantity") %>'
-                                Type="Integer" ErrorMessage="Exceed stock quantity"
-                                Display="Dynamic" ForeColor="Red" CssClass="validation-error" />
+                            <asp:RangeValidator ID="rvQuantity" runat="server"
+                                ControlToValidate="txtQty" 
+                                MinimumValue="1" 
+                                MaximumValue='<%# Math.Max(1, Convert.ToInt32(Eval("stockQuantity")) - 1) %>'
+                                Type="Integer" ErrorMessage="Cannot purchase all items. At least 1 must remain in stock."
+                                Display="Dynamic" ForeColor="Red" CssClass="validation-error"
+                                Enabled='<%# Convert.ToInt32(Eval("stockQuantity")) > 1 %>' />
                         </div>
                     </div>
+
+                    <!-- Sold Out Label -->
+                    <asp:Panel ID="pnlSoldOut" runat="server" Visible='<%# Convert.ToInt32(Eval("stockQuantity")) <= 0 %>' CssClass="sold-out-panel">
+                        <div class="sold-out-label">Sold Out</div>
+                    </asp:Panel>
 
                 </div>
 
@@ -66,10 +76,12 @@
                 <div class="action-buttons">
                     <asp:Button ID="btnBuyNow" runat="server" Text="Buy Now"
                         CssClass="btn btn-buy-now"
-                        OnClick="btnBuyNow_Click" />
+                        OnClick="btnBuyNow_Click"
+                        Enabled='<%# Convert.ToInt32(Eval("stockQuantity")) > 0 %>' />
                     <asp:Button ID="btnAddToCart" runat="server" Text="Add to Cart"
                         CssClass="btn btn-add-cart"
-                        OnClick="btnAddToCart_Click" />
+                        OnClick="btnAddToCart_Click"
+                        Enabled='<%# Convert.ToInt32(Eval("stockQuantity")) > 0 %>' />
                 </div>
             </ItemTemplate>
 
@@ -214,6 +226,29 @@
 
         .validation-error {
             font-size: 12px;
+        }
+
+        /* Sold Out Label */
+        .sold-out-panel {
+            margin: 24px 0;
+        }
+
+        .sold-out-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #dc3545;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
         }
 
         /* Toast Notification */

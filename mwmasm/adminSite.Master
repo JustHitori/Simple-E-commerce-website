@@ -46,8 +46,8 @@
 
                 <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/adminDashboard">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/manageCategories.aspx">Categories</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/admin/adminDashboard">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/admin/manageCategories.aspx">Categories</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/admin/manageProducts.aspx">Products</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/admin/manageOrders.aspx">Orders</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/admin/manageUsers.aspx">Users</a></li>

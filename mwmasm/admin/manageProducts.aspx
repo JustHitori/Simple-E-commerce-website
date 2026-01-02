@@ -18,7 +18,7 @@
         CssClass="form-select mb-1 mt-4"
         AutoPostBack="true"
         AppendDataBoundItems="true">
-        <asp:ListItem Text="-- Select a category --" Value="" />
+        <asp:ListItem Text="All" Value="-1" Selected="True" />
     </asp:DropDownList>
 
     <br />
@@ -170,7 +170,7 @@
     <asp:SqlDataSource ID="SqlDsProducts" runat="server"
         ConnectionString="<%$ ConnectionStrings:ConnectionString %>"
         SelectCommand="SELECT productId, categoryId, name, description, price, imageUrl, stockQuantity, dtAdded 
-                       FROM dbo.tblProducts WHERE categoryId = @categoryId ORDER BY dtAdded DESC"
+                       FROM dbo.tblProducts WHERE (@categoryId = -1 OR categoryId = @categoryId) ORDER BY dtAdded DESC"
         InsertCommand="INSERT INTO dbo.tblProducts (categoryId, name, description, price, imageUrl, stockQuantity)
                        VALUES (@categoryId, @name, @description, @price, @imageUrl, @stockQuantity)"
         DeleteCommand="DELETE FROM dbo.tblProducts WHERE productId=@productId"
@@ -181,11 +181,10 @@
                            price=@price,
                            imageUrl=@imageUrl,
                            stockQuantity=@stockQuantity
-                       WHERE productId=@productId"
-        CancelSelectOnNullParameter="true">
+                       WHERE productId=@productId">
 
         <SelectParameters>
-            <asp:ControlParameter Name="categoryId" ControlID="ddlCategories" PropertyName="SelectedValue" Type="Int32" />
+            <asp:ControlParameter Name="categoryId" ControlID="ddlCategories" PropertyName="SelectedValue" Type="Int32" DefaultValue="-1" />
         </SelectParameters>
 
         <DeleteParameters>

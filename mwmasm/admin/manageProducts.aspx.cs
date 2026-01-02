@@ -17,7 +17,11 @@ namespace mwmasm
         private string cs = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            if (!IsPostBack)
+            {
+                // Set "All" as default selected value
+                ddlCategories.SelectedValue = "-1";
+            }
         }
 
         protected void btnAddProduct_Click(object sender, EventArgs e)

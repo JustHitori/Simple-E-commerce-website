@@ -494,6 +494,87 @@ namespace mwmasm
                             cmd.ExecuteNonQuery();
                         }
 
+                        // Check stock availability and validate that at least 1 item remains
+                        string checkStockSql =
+                            @"
+                            SELECT ci.productId, ci.quantity, p.stockQuantity, p.name
+                            FROM dbo.tblCartItems ci
+                            INNER JOIN dbo.tblProducts p ON ci.productId = p.productId
+                            WHERE ci.shoppingCartId = @cartId
+                              AND ci.cartItemId IN (";
+                        for (int i = 0; i < selectedCartItemIds.Count; i++)
+                        {
+                            checkStockSql += "@checkStockItemId" + i;
+                            if (i < selectedCartItemIds.Count - 1)
+                                checkStockSql += ", ";
+                        }
+                        checkStockSql += ")";
+
+                        List<int> invalidProducts = new List<int>();
+                        using (SqlCommand cmd = new SqlCommand(checkStockSql, con, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@cartId", cartId);
+                            for (int i = 0; i < selectedCartItemIds.Count; i++)
+                            {
+                                cmd.Parameters.AddWithValue(
+                                    "@checkStockItemId" + i,
+                                    selectedCartItemIds[i]
+                                );
+                            }
+                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    int currentStock = (int)reader["stockQuantity"];
+                                    int orderQty = (int)reader["quantity"];
+                                    int remainingStock = currentStock - orderQty;
+
+                                    // Ensure at least 1 item remains after purchase
+                                    if (remainingStock < 1)
+                                    {
+                                        invalidProducts.Add((int)reader["productId"]);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (invalidProducts.Count > 0)
+                        {
+                            throw new Exception(
+                                "Cannot complete purchase. At least 1 item must remain in stock for each product."
+                            );
+                        }
+
+                        // Update stock quantity - decrease by quantity ordered
+                        string updateStockSql =
+                            @"
+                            UPDATE p
+                            SET p.stockQuantity = p.stockQuantity - ci.quantity
+                            FROM dbo.tblProducts p
+                            INNER JOIN dbo.tblCartItems ci ON p.productId = ci.productId
+                            WHERE ci.shoppingCartId = @cartId
+                              AND ci.cartItemId IN (";
+                        for (int i = 0; i < selectedCartItemIds.Count; i++)
+                        {
+                            updateStockSql += "@updateStockItemId" + i;
+                            if (i < selectedCartItemIds.Count - 1)
+                                updateStockSql += ", ";
+                        }
+                        updateStockSql += ")";
+
+                        using (SqlCommand cmd = new SqlCommand(updateStockSql, con, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@cartId", cartId);
+                            for (int i = 0; i < selectedCartItemIds.Count; i++)
+                            {
+                                cmd.Parameters.AddWithValue(
+                                    "@updateStockItemId" + i,
+                                    selectedCartItemIds[i]
+                                );
+                            }
+                            cmd.ExecuteNonQuery();
+                        }
+
                         // Delete selected items from cart
                         string deleteCartItemsSql =
                             @"

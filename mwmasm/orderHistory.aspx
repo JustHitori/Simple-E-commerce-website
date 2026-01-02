@@ -231,4 +231,28 @@
             }
         }
     </style>
+
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for tab parameter in URL
+            var urlParams = new URLSearchParams(window.location.search);
+            var tabParam = urlParams.get('tab');
+            
+            if (tabParam === 'ongoing') {
+                // Activate the ongoing tab using Bootstrap Tab API
+                var ongoingTab = document.getElementById('ongoing-tab');
+                if (ongoingTab) {
+                    var ongoingTabTrigger = new bootstrap.Tab(ongoingTab);
+                    ongoingTabTrigger.show();
+                }
+            } else if (tabParam === 'cancelled') {
+                // Activate the cancelled tab using Bootstrap Tab API
+                var cancelledTab = document.getElementById('cancelled-tab');
+                if (cancelledTab) {
+                    var cancelledTabTrigger = new bootstrap.Tab(cancelledTab);
+                    cancelledTabTrigger.show();
+                }
+            }
+        });
+    </script>
 </asp:Content>
