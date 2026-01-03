@@ -77,9 +77,9 @@ namespace mwmasm
                 {
                     customerId = (int)Session["CustomerID"];
                 }
-                else if (Session["CustomerId"] != null)
+                else
                 {
-                    customerId = (int)Session["CustomerId"];
+                    Response.Redirect("~/login.aspx");
                 }
 
                 string cs = ConfigurationManager

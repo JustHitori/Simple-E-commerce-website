@@ -95,6 +95,9 @@ namespace mwmasm
                         // Set cancel button visibility based on order status
                         SetCancelButtonVisibility(orderStatus);
 
+                        // Set feedback panel visibility based on order status
+                        SetFeedbackPanelVisibility(orderStatus, orderId);
+
                         // Set address information
                         // Extract address label from shipping address (first part before comma)
                         string[] addressParts = shippingAddress.Split(',');
@@ -257,6 +260,61 @@ namespace mwmasm
             }
         }
 
+        private void SetFeedbackPanelVisibility(string orderStatus, int orderId)
+        {
+            string status = orderStatus.Trim().ToLower();
+
+            // Show feedback panel only for Completed or Cancelled orders
+            if (status == "completed" || status == "cancelled")
+            {
+                // Check if feedback already exists - if it does, hide the panel
+                bool feedbackExists = CheckExistingFeedback(orderId);
+
+                if (feedbackExists)
+                {
+                    // Feedback already exists - hide both panels (feedback already submitted before)
+                    pnlFeedback.Visible = false;
+                    pnlFeedbackSuccess.Visible = false;
+                }
+                else
+                {
+                    // No feedback yet - show the panel and enable the form
+                    pnlFeedback.Visible = true;
+                    pnlFeedbackSuccess.Visible = false;
+                    btnSubmitFeedback.Enabled = true;
+                }
+            }
+            else
+            {
+                pnlFeedback.Visible = false;
+                pnlFeedbackSuccess.Visible = false;
+            }
+        }
+
+        private bool CheckExistingFeedback(int orderId)
+        {
+            string cs = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+
+            using (SqlConnection con = new SqlConnection(cs))
+            {
+                string sql =
+                    @"
+                    SELECT COUNT(*) as FeedbackCount
+                    FROM dbo.tblFeedback
+                    WHERE orderId = @orderId";
+
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@orderId", orderId);
+                    con.Open();
+                    int count = Convert.ToInt32(cmd.ExecuteScalar());
+                    con.Close();
+
+                    return count > 0;
+                }
+            }
+        }
+
         protected void btnCancelOrder_Click(object sender, EventArgs e)
         {
             if (Session["CustomerId"] == null)
@@ -315,6 +373,97 @@ namespace mwmasm
                         lblError.Visible = true;
                     }
                 }
+            }
+        }
+
+        protected void btnSubmitFeedback_Click(object sender, EventArgs e)
+        {
+            if (Session["CustomerId"] == null)
+            {
+                Response.Redirect("~/login.aspx");
+                return;
+            }
+
+            int orderId;
+            if (ViewState["OrderId"] != null)
+            {
+                orderId = (int)ViewState["OrderId"];
+            }
+            else
+            {
+                string orderIdParam = Request.QueryString["orderId"];
+                if (string.IsNullOrEmpty(orderIdParam) || !int.TryParse(orderIdParam, out orderId))
+                {
+                    lblFeedbackError.Text = "Invalid order ID.";
+                    lblFeedbackError.Visible = true;
+                    return;
+                }
+            }
+
+            int rating;
+            if (!int.TryParse(hidRating.Value, out rating) || rating < 1 || rating > 5)
+            {
+                return;
+            }
+
+            int customerId = (int)Session["CustomerId"];
+
+            string cs = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+
+            using (SqlConnection con = new SqlConnection(cs))
+            {
+                con.Open();
+
+                // Insert feedback
+                string insertSql =
+                    @"
+                    INSERT INTO dbo.tblFeedback (orderId, feedbackRate, dateProvided)
+                    VALUES (@orderId, @feedbackRate, SYSUTCDATETIME())";
+
+                using (SqlCommand insertCmd = new SqlCommand(insertSql, con))
+                {
+                    insertCmd.Parameters.AddWithValue("@orderId", orderId);
+                    insertCmd.Parameters.AddWithValue("@feedbackRate", rating);
+
+                    try
+                    {
+                        insertCmd.ExecuteNonQuery();
+
+                        // Hide feedback panel and show success panel
+                        pnlFeedback.Visible = false;
+                        pnlFeedbackSuccess.Visible = true;
+
+                        // Register JavaScript to hide success panel after 3 seconds
+                        string script =
+                            @"
+                            setTimeout(function() {
+                                var successPanel = document.getElementById('"
+                            + pnlFeedbackSuccess.ClientID
+                            + @"');
+                                if (successPanel) {
+                                    successPanel.style.transition = 'opacity 0.5s ease-out';
+                                    successPanel.style.opacity = '0';
+                                    setTimeout(function() {
+                                        successPanel.style.display = 'none';
+                                    }, 500);
+                                }
+                            }, 3000);";
+                        ClientScript.RegisterStartupScript(
+                            this.GetType(),
+                            "HideSuccessPanel",
+                            script,
+                            true
+                        );
+                    }
+                    catch (Exception)
+                    {
+                        lblFeedbackError.Text =
+                            "An error occurred while submitting feedback. Please try again.";
+                        lblFeedbackError.Visible = true;
+                    }
+                }
+
+                con.Close();
             }
         }
 
