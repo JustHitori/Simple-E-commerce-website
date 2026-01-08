@@ -100,7 +100,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <asp:ValidationSummary ID="vsAddAdmin" runat="server" ValidationGroup="AddAdmin" CssClass="text-danger" />
 
                     <div class="col-12 mb-3">
                         <asp:Label runat="server" AssociatedControlID="txtAdminUsername" Text="Username" />

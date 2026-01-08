@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
+using System.Web.Script.Serialization;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -20,7 +21,7 @@ namespace mwmasm
             if (!IsPostBack)
             {
                 LoadStatistics();
-                RenderCharts();
+                RenderChartData();
                 LoadTopProducts();
             }
         }
@@ -161,47 +162,37 @@ namespace mwmasm
             return stats;
         }
 
-        public string GetStatValue(string statType, int index)
-        {
-            if (statsData.ContainsKey(statType) && statsData[statType].Count > index)
-            {
-                decimal value = statsData[statType][index];
-                if (statType == "sales")
-                {
-                    return value.ToString("N2");
-                }
-                return value.ToString("0");
-            }
-            return "0";
-        }
-
-        public string GetBarHeight(string statType, int index)
-        {
-            if (statsData.ContainsKey(statType) && statsData[statType].Count > index)
-            {
-                List<decimal> values = statsData[statType];
-                decimal maxValue = values.Max() > 0 ? values.Max() : 1;
-                decimal currentValue = values[index];
-                decimal percentage = (currentValue / maxValue) * 100;
-                return percentage.ToString("0");
-            }
-            return "0";
-        }
-
-        private void RenderCharts()
+        private void RenderChartData()
         {
             // Calculate month names for the last 3 months
             DateTime now = DateTime.Now;
             string[] monthLabels = new string[3];
-            monthLabels[0] = now.AddMonths(-3).ToString("MMMM yyyy"); // 3 months ago
-            monthLabels[1] = now.AddMonths(-2).ToString("MMMM yyyy"); // 2 months ago
-            monthLabels[2] = now.AddMonths(-1).ToString("MMMM yyyy"); // 1 month ago
+            monthLabels[0] = now.AddMonths(-3).ToString("MMM yyyy"); // 3 months ago
+            monthLabels[1] = now.AddMonths(-2).ToString("MMM yyyy"); // 2 months ago
+            monthLabels[2] = now.AddMonths(-1).ToString("MMM yyyy"); // 1 month ago
 
-            // Set chart bars
-            litUsersChart.Text = GenerateChartBars("users", monthLabels);
-            litProductsChart.Text = GenerateChartBars("products", monthLabels);
-            litOrdersChart.Text = GenerateChartBars("orders", monthLabels);
-            litSalesChart.Text = GenerateChartBars("sales", monthLabels, true);
+            // Prepare data object for JSON serialization
+            var chartData = new
+            {
+                monthLabels = monthLabels,
+                users = statsData.ContainsKey("users")
+                    ? statsData["users"].Select(x => (double)x).ToArray()
+                    : new double[] { 0, 0, 0 },
+                products = statsData.ContainsKey("products")
+                    ? statsData["products"].Select(x => (double)x).ToArray()
+                    : new double[] { 0, 0, 0 },
+                orders = statsData.ContainsKey("orders")
+                    ? statsData["orders"].Select(x => (double)x).ToArray()
+                    : new double[] { 0, 0, 0 },
+                sales = statsData.ContainsKey("sales")
+                    ? statsData["sales"].Select(x => (double)x).ToArray()
+                    : new double[] { 0, 0, 0 },
+            };
+
+            // Serialize to JSON and set in hidden field
+            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            string jsonData = serializer.Serialize(chartData);
+            hfChartData.Value = jsonData;
 
             // Set totals
             litUsersTotal.Text = GetTotalText("users", false);
@@ -228,49 +219,6 @@ namespace mwmasm
             {
                 return string.Format("({0})", total.ToString("0"));
             }
-        }
-
-        private string GenerateChartBars(
-            string statType,
-            string[] monthLabels,
-            bool isSales = false
-        )
-        {
-            if (!statsData.ContainsKey(statType) || statsData[statType].Count < 3)
-            {
-                return GenerateBar(0, "0", monthLabels[0], isSales)
-                    + GenerateBar(0, "0", monthLabels[1], isSales)
-                    + GenerateBar(0, "0", monthLabels[2], isSales);
-            }
-
-            List<decimal> values = statsData[statType];
-            decimal maxValue = values.Max() > 0 ? values.Max() : 1;
-
-            string html = "";
-            for (int i = 0; i < 3; i++)
-            {
-                decimal currentValue = values[i];
-                decimal percentage = (currentValue / maxValue) * 100;
-                string valueStr = isSales
-                    ? "RM " + currentValue.ToString("N2")
-                    : currentValue.ToString("0");
-                html += GenerateBar(percentage, valueStr, monthLabels[i], isSales);
-            }
-
-            return html;
-        }
-
-        private string GenerateBar(decimal height, string value, string monthLabel, bool isSales)
-        {
-            return string.Format(
-                @"<div class=""chart-bar"" style=""height: {0}%"">
-                    <span class=""chart-value"">{1}</span>
-                    <span class=""chart-bar-label"">{2}</span>
-                </div>",
-                height.ToString("0"),
-                value,
-                monthLabel
-            );
         }
 
         private void LoadTopProducts()

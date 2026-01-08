@@ -13,14 +13,11 @@ namespace mwmasm
 
     public partial class adminDashboard
     {
-        protected global::System.Web.UI.WebControls.Literal litUsersChart;
-        protected global::System.Web.UI.WebControls.Literal litProductsChart;
-        protected global::System.Web.UI.WebControls.Literal litOrdersChart;
-        protected global::System.Web.UI.WebControls.Literal litSalesChart;
         protected global::System.Web.UI.WebControls.Literal litUsersTotal;
         protected global::System.Web.UI.WebControls.Literal litProductsTotal;
         protected global::System.Web.UI.WebControls.Literal litOrdersTotal;
         protected global::System.Web.UI.WebControls.Literal litSalesTotal;
+        protected global::System.Web.UI.WebControls.HiddenField hfChartData;
         protected global::System.Web.UI.WebControls.Repeater rptTopProducts;
     }
 }

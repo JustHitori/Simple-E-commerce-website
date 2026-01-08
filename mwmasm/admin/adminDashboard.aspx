@@ -1,5 +1,8 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/adminSite.Master" AutoEventWireup="true" CodeBehind="adminDashboard.aspx.cs" Inherits="mwmasm.adminDashboard" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+    <!-- Add Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <style>
         .border-black {
             border: 1px solid black;
@@ -20,47 +23,18 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 20px;
-            min-height: 250px;
+            min-height: 300px;
             box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
         }
         .stat-chart h3 {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             font-size: 1.2rem;
             font-weight: 600;
         }
         .chart-container {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-around;
-            height: 180px;
-            gap: 15px;
-            margin-bottom: 0.5rem;
-        }
-        .chart-bar {
-            flex: 1;
-            background-color: #dc2626;
-            border-radius: 4px 4px 0 0;
-            min-width: 40px;
             position: relative;
-            transition: height 0.3s ease;
-        }
-        .chart-bar-label {
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.85rem;
-            white-space: nowrap;
-        }
-        .chart-value {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.9rem;
-            font-weight: 600;
-            width:100%;
-            text-align: center;
+            height: 250px;
+            width: 100%;
         }
         .top-products-section {
             margin-bottom: 40px;
@@ -117,7 +91,7 @@
         <div class="stat-chart">
             <h3>Total Users <asp:Literal ID="litUsersTotal" runat="server"></asp:Literal></h3>
             <div class="chart-container">
-                <asp:Literal ID="litUsersChart" runat="server"></asp:Literal>
+                <canvas id="usersChart"></canvas>
             </div>
         </div>
 
@@ -125,7 +99,7 @@
         <div class="stat-chart">
             <h3>Total Products <asp:Literal ID="litProductsTotal" runat="server"></asp:Literal></h3>
             <div class="chart-container">
-                <asp:Literal ID="litProductsChart" runat="server"></asp:Literal>
+                <canvas id="productsChart"></canvas>
             </div>
         </div>
 
@@ -133,7 +107,7 @@
         <div class="stat-chart">
             <h3>Total Orders <asp:Literal ID="litOrdersTotal" runat="server"></asp:Literal></h3>
             <div class="chart-container">
-                <asp:Literal ID="litOrdersChart" runat="server"></asp:Literal>
+                <canvas id="ordersChart"></canvas>
             </div>
         </div>
 
@@ -141,10 +115,13 @@
         <div class="stat-chart">
             <h3>Total Sales <asp:Literal ID="litSalesTotal" runat="server"></asp:Literal></h3>
             <div class="chart-container">
-                <asp:Literal ID="litSalesChart" runat="server"></asp:Literal>
+                <canvas id="salesChart"></canvas>
             </div>
         </div>
     </div>
+
+    <!-- Hidden field to store chart data from server -->
+    <asp:HiddenField ID="hfChartData" runat="server" />
 
     <!-- Top Products Section -->
     <div class="top-products-section">
@@ -186,4 +163,107 @@
             </a>
         </div>
     </div>
+
+    <script type="text/javascript">
+        // Get chart data from hidden field
+        var chartData = JSON.parse(document.getElementById('<%= hfChartData.ClientID %>').value);
+        
+        // Helper function to create common chart options
+        function getCommonOptions() {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            };
+        }
+
+        // Users Chart
+        new Chart(document.getElementById('usersChart'), {
+            type: 'bar',
+            data: {
+                labels: chartData.monthLabels,
+                datasets: [{
+                    label: 'Users',
+                    data: chartData.users,
+                    backgroundColor: 'rgba(220, 38, 38, 0.8)',
+                    borderColor: 'rgba(220, 38, 38, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: getCommonOptions()
+        });
+
+        // Products Chart
+        new Chart(document.getElementById('productsChart'), {
+            type: 'bar',
+            data: {
+                labels: chartData.monthLabels,
+                datasets: [{
+                    label: 'Products',
+                    data: chartData.products,
+                    backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                    borderColor: 'rgba(34, 197, 94, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: getCommonOptions()
+        });
+
+        // Orders Chart
+        new Chart(document.getElementById('ordersChart'), {
+            type: 'bar',
+            data: {
+                labels: chartData.monthLabels,
+                datasets: [{
+                    label: 'Orders',
+                    data: chartData.orders,
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: getCommonOptions()
+        });
+
+        // Sales Chart with custom formatting
+        var salesOptions = getCommonOptions();
+        salesOptions.scales.y.ticks.callback = function(value) {
+            return 'RM ' + value.toLocaleString('en-US', {minimumFractionDigits: 2});
+        };
+        salesOptions.plugins.tooltip.callbacks = {
+            label: function(context) {
+                return 'Sales: RM ' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2});
+            }
+        };
+        
+        new Chart(document.getElementById('salesChart'), {
+            type: 'bar',
+            data: {
+                labels: chartData.monthLabels,
+                datasets: [{
+                    label: 'Sales (RM)',
+                    data: chartData.sales,
+                    backgroundColor: 'rgba(168, 85, 247, 0.8)',
+                    borderColor: 'rgba(168, 85, 247, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: salesOptions
+        });
+    </script>
 </asp:Content>
