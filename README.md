@@ -3,9 +3,11 @@
 
 KawaiiTech is a simple e-commerce web application built for assignment purposes. The system is designed for selling **digital accessories** and demonstrates common e-commerce workflows such as user accounts, product catalog browsing, cart management, ordering, delivery tracking, and customer feedback.
 
-> Status: **In development (not finished yet)**  
 > The project progress is tracked and reflected through **Git commits** in this repository.
 
+Admin Login Credentials: 
+username: admin
+pasword:admin
 ---
 
 ## Project Objectives

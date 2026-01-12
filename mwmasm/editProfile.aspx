@@ -88,7 +88,7 @@
             CssClass="text-danger" />
 
         <!-- Save Button -->
-        <div class="button-container">
+        <div class="button-container d-flex justify-content-center">
             <asp:Button ID="btnSave" runat="server" Text="Save Changes" OnClick="btnSave_Click" CssClass="btn-save" />
         </div>
     </div>

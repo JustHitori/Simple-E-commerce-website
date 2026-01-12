@@ -132,6 +132,7 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="images\address-image.png" />
+    <Content Include="images\placeholder-image.jpg" />
     <Content Include="login.aspx" />
     <Content Include="admin\manageCategories.aspx" />
     <Content Include="admin\manageProducts.aspx" />

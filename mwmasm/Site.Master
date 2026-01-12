@@ -51,7 +51,6 @@
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/productCatalog">Products</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/shoppingCart">Carts</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/orderHistory">Orders</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/login">Login</a></li>
                     </ul>
                 </div>
             </div>

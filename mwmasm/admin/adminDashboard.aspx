@@ -85,9 +85,7 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <h1 class="mb-4">Admin Dashboard</h1>
 
-    <!-- Summary Statistics Section -->
     <div class="stats-grid">
-        <!-- Total Users Chart -->
         <div class="stat-chart">
             <h3>Total Users <asp:Literal ID="litUsersTotal" runat="server"></asp:Literal></h3>
             <div class="chart-container">
@@ -95,7 +93,6 @@
             </div>
         </div>
 
-        <!-- Total Products Chart -->
         <div class="stat-chart">
             <h3>Total Products <asp:Literal ID="litProductsTotal" runat="server"></asp:Literal></h3>
             <div class="chart-container">
@@ -103,7 +100,6 @@
             </div>
         </div>
 
-        <!-- Total Orders Chart -->
         <div class="stat-chart">
             <h3>Total Orders <asp:Literal ID="litOrdersTotal" runat="server"></asp:Literal></h3>
             <div class="chart-container">
@@ -111,7 +107,6 @@
             </div>
         </div>
 
-        <!-- Total Sales Chart -->
         <div class="stat-chart">
             <h3>Total Sales <asp:Literal ID="litSalesTotal" runat="server"></asp:Literal></h3>
             <div class="chart-container">
@@ -192,7 +187,6 @@
             };
         }
 
-        // Users Chart
         new Chart(document.getElementById('usersChart'), {
             type: 'bar',
             data: {
@@ -208,7 +202,6 @@
             options: getCommonOptions()
         });
 
-        // Products Chart
         new Chart(document.getElementById('productsChart'), {
             type: 'bar',
             data: {
@@ -224,7 +217,6 @@
             options: getCommonOptions()
         });
 
-        // Orders Chart
         new Chart(document.getElementById('ordersChart'), {
             type: 'bar',
             data: {
@@ -240,7 +232,6 @@
             options: getCommonOptions()
         });
 
-        // Sales Chart with custom formatting
         var salesOptions = getCommonOptions();
         salesOptions.scales.y.ticks.callback = function(value) {
             return 'RM ' + value.toLocaleString('en-US', {minimumFractionDigits: 2});

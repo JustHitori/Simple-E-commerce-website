@@ -14,7 +14,10 @@ namespace mwmasm
 {
     public partial class manageProducts : System.Web.UI.Page
     {
-        private string cs = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+        private string cs = ConfigurationManager
+            .ConnectionStrings["ConnectionString"]
+            .ConnectionString;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -27,7 +30,8 @@ namespace mwmasm
         protected void btnAddProduct_Click(object sender, EventArgs e)
         {
             Page.Validate("InsertProd");
-            if (!Page.IsValid) return;
+            if (!Page.IsValid)
+                return;
 
             int categoryId;
             if (!int.TryParse(ddlModalCategory.SelectedValue, out categoryId))
@@ -39,7 +43,14 @@ namespace mwmasm
             string name = txtModalName.Text.Trim();
             string description = txtModalDesc.Text.Trim();
 
-            if (!decimal.TryParse(txtModalPrice.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal price))
+            if (
+                !decimal.TryParse(
+                    txtModalPrice.Text,
+                    NumberStyles.Number,
+                    CultureInfo.InvariantCulture,
+                    out decimal price
+                )
+            )
             {
                 return;
             }
@@ -74,7 +85,6 @@ namespace mwmasm
                 imageUrl = ResolveUrl("~/productImages/" + serverFileName);
             }
 
-
             SqlDsProducts.InsertParameters.Clear();
             SqlDsProducts.InsertParameters.Add("categoryId", categoryId.ToString());
             SqlDsProducts.InsertParameters.Add("name", name);
@@ -86,7 +96,10 @@ namespace mwmasm
             {
                 SqlDsProducts.InsertParameters.Add("description", description);
             }
-            SqlDsProducts.InsertParameters.Add("price", price.ToString(CultureInfo.InvariantCulture));
+            SqlDsProducts.InsertParameters.Add(
+                "price",
+                price.ToString(CultureInfo.InvariantCulture)
+            );
             SqlDsProducts.InsertParameters.Add("imageUrl", imageUrl);
             SqlDsProducts.InsertParameters.Add("stockQuantity", stock.ToString());
 
@@ -100,9 +113,10 @@ namespace mwmasm
             gvProducts.DataBind();
 
             lblStatus.Text = "Product Added";
-            string js = $"setTimeout(function(){{var el=document.getElementById('{lblStatus.ClientID}');" +
-                                "if(el){ el.textContent=''; el.classList.remove('text-success','text-danger'); }" +
-                                "}, 3000);";
+            string js =
+                $"setTimeout(function(){{var el=document.getElementById('{lblStatus.ClientID}');"
+                + "if(el){ el.textContent=''; el.classList.remove('text-success','text-danger'); }"
+                + "}, 3000);";
             ScriptManager.RegisterStartupScript(this, GetType(), "hideStatusMsg", js, true);
         }
 
@@ -119,7 +133,8 @@ namespace mwmasm
                     {
                         var keyObj = gvProducts.DataKeys[row.RowIndex].Value;
 
-                        SqlDsProducts.DeleteParameters["productId"].DefaultValue = keyObj.ToString();
+                        SqlDsProducts.DeleteParameters["productId"].DefaultValue =
+                            keyObj.ToString();
                         SqlDsProducts.Delete();
                         deleteCount++;
                     }
@@ -129,16 +144,18 @@ namespace mwmasm
 
                     lblStatus.CssClass = "text-success";
                     lblStatus.Text = "Product deleted";
-                    string js = $"setTimeout(function(){{var el=document.getElementById('{lblStatus.ClientID}');" +
-                                        "if(el){ el.textContent=''; el.classList.remove('text-success','text-danger'); }" +
-                                        "}, 3000);";
+                    string js =
+                        $"setTimeout(function(){{var el=document.getElementById('{lblStatus.ClientID}');"
+                        + "if(el){ el.textContent=''; el.classList.remove('text-success','text-danger'); }"
+                        + "}, 3000);";
                     ScriptManager.RegisterStartupScript(this, GetType(), "hideStatusMsg", js, true);
                 }
             }
             catch (Exception ex)
             {
                 lblStatus.CssClass = "text-danger";
-                lblStatus.Text = "Error: " + ex.Message;
+                lblStatus.Text =
+                    "Error: " + "This product is associated with a delivery and cannot be deleted.";
             }
         }
 
@@ -174,9 +191,9 @@ namespace mwmasm
                 }
                 imageUrl = ResolveUrl("~/productImages/" + serverFileName);
             }
-            e.NewValues["imageUrl"] = string.IsNullOrEmpty(imageUrl) ? (object)DBNull.Value : imageUrl;
-
+            e.NewValues["imageUrl"] = string.IsNullOrEmpty(imageUrl)
+                ? (object)DBNull.Value
+                : imageUrl;
         }
-
     }
 }
